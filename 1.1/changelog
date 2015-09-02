@@ -1,8 +1,0 @@
-Ratings 1.1 - Jul 27, 2013 23:58
-
-- moved adding rating-bar listeners to seperate function
-- added remove listener functions
-- removeAllListners before sendRating and deleteRating and add them back in getRatings
-- requires "prec-math.js"
-- removed extra space in ratings.php
-- added $updated to ratings.php
