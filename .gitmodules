@@ -1,3 +1,9 @@
-[submodule "lib/ajax-only"]
-	path = lib/ajax-only
-	url = git@github.com:xinxinw1/ajax-only.git
+[submodule "lib/tools"]
+	path = lib/tools
+	url = git@github.com:xinxinw1/tools.git
+[submodule "lib/prec-math"]
+	path = lib/prec-math
+	url = git@github.com:xinxinw1/prec-math.git
+[submodule "lib/ajax"]
+	path = lib/ajax
+	url = git@github.com:xinxinw1/ajax.git
