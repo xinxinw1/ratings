@@ -120,47 +120,15 @@ function getRatingText(ratings){
   return ratings + " ratings";
 }
 
-var tmpstatus = "";
 function getStatusText(){
-  if (tmpstatus != "")return tmpstatus;
   if (n == 0)return "No ratings. Click to rate.";
   return getStarText(avg) + " | " + getRatingText(n);
 }
 
-var tmpyour = "";
 function getYourText(){
   if (errmsg != "")return errmsg;
-  if (tmpyour != "")return tmpyour;
   if (rating == "-1")return "";
   return "Your rating: " + getStarText(rating);
-}
-
-function refreshYourText(){
-  setYour(getYourText());
-}
-
-function refreshStatusText(){
-  setStatus(getStatusText());
-}
-
-function tempStatusText(a){
-  tmpstatus = a;
-  refreshStatusText();
-}
-
-function tempYourText(a){
-  tmpyour = a;
-  refreshYourText();
-}
-
-function remTempStatusText(){
-  tmpstatus = "";
-  refreshStatusText();
-}
-
-function remTempYourText(){
-  tmpyour = "";
-  refreshYourText();
 }
 
 var errmsg = "";
@@ -168,14 +136,14 @@ var currtime = null;
 function newError(msg){
   if (currtime !== null)clearTimeout(currtime);
   errmsg = msg;
-  refreshYourText();
+  setYour(getYourText());
   currtime = setTimeout(removeError, 3000);
 }
 
 function removeError(){
   if (currtime !== null)clearTimeout(currtime);
   errmsg = "";
-  refreshYourText();
+  setYour(getYourText());
 }
 
 // http://stackoverflow.com/questions/442404/dynamically-retrieve-the-position-x-y-of-an-html-element
@@ -194,21 +162,22 @@ function ceilTo(n, a){
 }
 
 function getRatings(){
-  tempStatusText("Getting Ratings...");
+  setStatus("Getting Ratings...");
   aget("ratings.php", {type: "getRatings", id: id}, function (resp){
     var nums = resp.split("|");
     n = nums[0];
     avg = nums[1];
     avg = rnd(avg, 2);
     dispRating(avg);
-    remTempStatusText();
-    refreshYourText();
+    setStatus(getStatusText());
+    setYour(getYourText());
     addAllListeners();
   });
 }
 
 ajaxerr(function (o){
-  remTempYourText();
+  currRating = -1;
+  dispRating(avg);
   newError("Error! Status: " + o.status);
   addAllListeners();
 });
@@ -223,15 +192,16 @@ function sendRating(){
   if (currRating == -1)return;
   removeAllListeners();
   removeError();
-  tempYourText("Sending...");
+  setYour("Sending...");
   apost("ratings.php", {type: "sendRating", id: id, rating: currRating}, function (resp){
     if (resp == "1"){
       rating = currRating;
-      remTempYourText();
+      setYour(getYourText());
       getRatings();
     } else {
       if (resp == "Sign in to rate")doLogout();
-      remTempYourText();
+      currRating = -1;
+      dispRating(avg);
       newError("Error! " + resp);
       addAllListeners();
     }
@@ -241,16 +211,17 @@ function sendRating(){
 function deleteRating(){
   removeAllListeners();
   removeError();
-  tempYourText("Deleting...");
+  setYour("Deleting...");
   apost("ratings.php", {type: "deleteRating", id: id}, function (resp){
     if (resp == "1"){
       rating = "-1";
-      remTempYourText();
+      setYour(getYourText());
       removeDeleteListeners();
       getRatings();
     } else {
       if (resp == "Sign in to rate")doLogout();
-      remTempYourText();
+      currRating = -1;
+      dispRating(avg);
       newError("Error! " + resp);
       addAllListeners();
     }
