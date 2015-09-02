@@ -1,0 +1,2 @@
+RewriteEngine on
+RewriteRule ^latest/(.*)$ 1.2/$1

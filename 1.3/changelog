@@ -1,0 +1,6 @@
+Ratings 1.3 - Aug 17, 2013 14:19
+
+- upgraded to events 3.x, ajax 2.x, and prec-math 2.x
+- variables sent to ratings.js via a Ratings object
+- ratings.js has been modularized
+- don't display anything if id is empty

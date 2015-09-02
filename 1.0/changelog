@@ -1,0 +1,4 @@
+Ratings 1.0 - Jul 27, 2013 21:58
+
+- first working version
+- features getRatings, sendRating, and deleteRating

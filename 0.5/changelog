@@ -1,0 +1,6 @@
+Ratings 0.5 - Jul 13, 2013 21:58
+
+- border: 0 -> border: none
+- img -> #rating img
+- removed height and width on .clear
+- changed margin-top from 2 to 3 px to compensate for 1px loss on clear div
