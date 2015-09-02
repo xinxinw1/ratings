@@ -6,6 +6,7 @@
 
 var aget = $.aget;
 var apost = $.apost;
+var ajaxerr = $.ajaxerr;
 var rnd = R.rnd;
 
 var n = 0;
@@ -84,6 +85,12 @@ function removeDeleteListeners(){
   $("rating-your").onmouseleave = null;
 }
 
+function addAllListeners(){
+  addRatingBarListeners();
+  if (username != "")addClickListener();
+  if (rating != "-1")addDeleteListeners();
+}
+
 function removeAllListeners(){
   removeClickListener();
   removeRatingBarListeners();
@@ -103,27 +110,72 @@ function setYour(text){
   $("rating-your").innerHTML = text;
 }
 
-function getStatusText(){
-  if (n == 0){
-    return "No ratings. Click to rate.";
-  } else {
-    return getStarText(avg) + " | " + getRatingText(n);
-  }
-}
-
-function getYourText(){
-  if (rating == "-1")return "";
-  else return "Your rating: " + getStarText(rating);
-}
-
 function getStarText(stars){
   if (stars == 1)return "1 star";
-  else return stars + " stars";
+  return stars + " stars";
 }
 
 function getRatingText(ratings){
   if (ratings == 1)return "1 rating";
-  else return ratings + " ratings";
+  return ratings + " ratings";
+}
+
+var tmpstatus = "";
+function getStatusText(){
+  if (tmpstatus != "")return tmpstatus;
+  if (n == 0)return "No ratings. Click to rate.";
+  return getStarText(avg) + " | " + getRatingText(n);
+}
+
+var tmpyour = "";
+function getYourText(){
+  if (errmsg != "")return errmsg;
+  if (tmpyour != "")return tmpyour;
+  if (rating == "-1")return "";
+  return "Your rating: " + getStarText(rating);
+}
+
+function refreshYourText(){
+  setYour(getYourText());
+}
+
+function refreshStatusText(){
+  setStatus(getStatusText());
+}
+
+function tempStatusText(a){
+  tmpstatus = a;
+  refreshStatusText();
+}
+
+function tempYourText(a){
+  tmpyour = a;
+  refreshYourText();
+}
+
+function remTempStatusText(){
+  tmpstatus = "";
+  refreshStatusText();
+}
+
+function remTempYourText(){
+  tmpyour = "";
+  refreshYourText();
+}
+
+var errmsg = "";
+var currtime = null;
+function newError(msg){
+  if (currtime !== null)clearTimeout(currtime);
+  errmsg = msg;
+  refreshYourText();
+  currtime = setTimeout(removeError, 3000);
+}
+
+function removeError(){
+  if (currtime !== null)clearTimeout(currtime);
+  errmsg = "";
+  refreshYourText();
 }
 
 // http://stackoverflow.com/questions/442404/dynamically-retrieve-the-position-x-y-of-an-html-element
@@ -142,48 +194,65 @@ function ceilTo(n, a){
 }
 
 function getRatings(){
-  setStatus("Getting Ratings...");
+  tempStatusText("Getting Ratings...");
   aget("ratings.php", {type: "getRatings", id: id}, function (resp){
     var nums = resp.split("|");
     n = nums[0];
     avg = nums[1];
     avg = rnd(avg, 2);
     dispRating(avg);
-    setStatus(getStatusText());
-    setYour(getYourText());
-    addRatingBarListeners();
-    if (username != "")addClickListener();
-    if (rating != "-1")addDeleteListeners();
+    remTempStatusText();
+    refreshYourText();
+    addAllListeners();
   });
+}
+
+ajaxerr(function (o){
+  remTempYourText();
+  newError("Error! Status: " + o.status);
+  addAllListeners();
+});
+
+function doLogout(){
+  username = "";
+  rating = "-1";
 }
 
 function sendRating(){
   var currRating = window.currRating;
   if (currRating == -1)return;
   removeAllListeners();
-  setYour("Sending...");
+  removeError();
+  tempYourText("Sending...");
   apost("ratings.php", {type: "sendRating", id: id, rating: currRating}, function (resp){
     if (resp == "1"){
       rating = currRating;
-      setYour(getYourText());
+      remTempYourText();
       getRatings();
     } else {
-      setYour("Error! " + resp);
+      if (resp == "Sign in to rate")doLogout();
+      remTempYourText();
+      newError("Error! " + resp);
+      addAllListeners();
     }
   });
 }
 
 function deleteRating(){
   removeAllListeners();
-  setYour("Deleting...");
+  removeError();
+  tempYourText("Deleting...");
   apost("ratings.php", {type: "deleteRating", id: id}, function (resp){
     if (resp == "1"){
       rating = "-1";
-      setYour(getYourText());
+      remTempYourText();
       removeDeleteListeners();
       getRatings();
     } else {
-      setYour("Error! " + resp);
+      if (resp == "Sign in to rate")doLogout();
+      remTempYourText();
+      newError("Error! " + resp);
+      addAllListeners();
     }
   });
 }
