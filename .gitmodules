@@ -1,0 +1,3 @@
+[submodule "lib/ajax-only"]
+	path = lib/ajax-only
+	url = git@github.com:xinxinw1/ajax-only.git
