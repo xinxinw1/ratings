@@ -1,11 +1,8 @@
 <?php header("Cache-Control: no-cache"); ?>
 <?php session_start(); ?>
+<?php $version = "2.0"; ?>
+<?php require "dbinfo.php"; ?>
 <?php
-$dbhost = "localhost";
-$dbuser = "ourspe5_ratings";
-$dbpass = "ratings";
-$dbname = "ourspe5_Ratings";
-
 $conn = mysql_connect($dbhost, $dbuser, $dbpass) OR die(mysql_error());
 mysql_select_db($dbname, $conn) OR die(mysql_error());
 
@@ -110,12 +107,11 @@ if ($username != "" && $id != ""){
   }
 }
 ?>
-<?php $updated = "Jul.28.2013.15.47"; ?>
 <!DOCTYPE html>
 <html>
 
 <head>
-  <title>Ratings 1.2</title>
+  <title>Ratings <?php echo $version ?></title>
   <meta charset="UTF-8">
   <style type="text/css">
   * {margin: 0; padding: 0; border: 0 none;}
@@ -138,10 +134,10 @@ if ($username != "" && $id != ""){
   #rating-top-stars {width: 150px;}
   #rating-text {color: #B5B5B5; font-weight: bold; text-align: center; margin-top: 3px;}
   </style>
-  <script src="/codes/libjs/events/2.x/events.js?<?php echo $updated ?>"></script>
-  <script src="/codes/libjs/ajax/1.x/ajax.js?<?php echo $updated ?>"></script>
-  <script src="/codes/libjs/prec-math/1.7.1/prec-math.js?<?php echo $updated ?>"></script>
-  <script src="ratings.js?<?php echo $updated ?>" defer></script>
+  <script src="lib/tools/tools.js"></script>
+  <script src="lib/ajax/ajax.js"></script>
+  <script src="lib/prec-math/prec-math.js"></script>
+  <script src="ratings.js" defer></script>
   <script>
   username = "<?php echo $username ?>";
   rating = "<?php echo $rating ?>";

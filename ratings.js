@@ -1,12 +1,12 @@
-/***** Ratings 1.2 *****/
+/***** Ratings 2.0 *****/
 
-/* requires "events.js" */
-/* requires "ajax.js" */
-/* requires "prec-math.js" */
+/* require tools 4.5.1 */
+/* require ajax 4.4.0 */
+/* require prec-math 4.3.1 */
 
-function $(a){
-  return document.getElementById(a);
-}
+var aget = $.aget;
+var apost = $.apost;
+var rnd = R.rnd;
 
 var n = 0;
 var avg = 0;
@@ -15,18 +15,17 @@ var currRating = -1;
 window.onload = getRatings;
 
 function addClickListener(){
-  setListener($("rating-bar"), "click", function (){
+  $("rating-bar").onclick = function (){
     sendRating();
-  });
+  };
 }
 
 function removeClickListener(){
-  removeListener($("rating-bar"), "click");
+  $("rating-bar").onclick = null;
 }
 
 function addRatingBarListeners(){
-  var a;
-  setListener($("rating-bar"), "mousemove", function (e){
+  $("rating-bar").onmousemove = function (e){
     if (username != ""){
       e = e || window.event; // IE-ism
       var x = e.clientX;
@@ -51,38 +50,38 @@ function addRatingBarListeners(){
     } else {
       setYour("Sign in to rate");
     }
-  });
+  };
   
-  setListener($("rating-bar"), "mouseleave", function (){
+  $("rating-bar").onmouseleave = function (){
     if (username != ""){
       currRating = -1;
       dispRating(avg);
     }
     setYour(getYourText());
-  });
+  };
 }
 
 function removeRatingBarListeners(){
-  removeListener($("rating-bar"), "mousemove");
-  removeListener($("rating-bar"), "mouseleave");
+  $("rating-bar").onmousemove = null;
+  $("rating-bar").onmouseleave = null;
 }
 
 function addDeleteListeners(){
-  setListener($("rating-your"), "mouseenter", function (){
+  $("rating-your").onmouseenter = function (){
     var html = "<a href=\"javascript:void(0)\" onclick=\"deleteRating()\">";
     html += "Delete Rating";
     html += "</a>";
     setYour(html);
-  });
+  };
   
-  setListener($("rating-your"), "mouseleave", function (){
+  $("rating-your").onmouseleave = function (){
     setYour(getYourText());
-  });
+  };
 }
 
 function removeDeleteListeners(){
-  removeListener($("rating-your"), "mouseenter");
-  removeListener($("rating-your"), "mouseleave");
+  $("rating-your").onmouseenter = null;
+  $("rating-your").onmouseleave = null;
 }
 
 function removeAllListeners(){
@@ -144,24 +143,18 @@ function ceilTo(n, a){
 
 function getRatings(){
   setStatus("Getting Ratings...");
-  var file = "ratings.php";
-  var params = "type=getRatings&id=" + id;
-  var func = function (resp){
+  aget("ratings.php", {type: "getRatings", id: id}, function (resp){
     var nums = resp.split("|");
     n = nums[0];
     avg = nums[1];
-    avg = roundr(avg, 2);
+    avg = rnd(avg, 2);
     dispRating(avg);
     setStatus(getStatusText());
     setYour(getYourText());
     addRatingBarListeners();
     if (username != "")addClickListener();
     if (rating != "-1")addDeleteListeners();
-  };
-  var type = "GET";
-  var async = true;
-  
-  ajaxRequest(file, params, func, type, async);
+  });
 }
 
 function sendRating(){
@@ -169,9 +162,7 @@ function sendRating(){
   if (currRating == -1)return;
   removeAllListeners();
   setYour("Sending...");
-  var file = "ratings.php";
-  var params = "type=sendRating&id=" + id + "&rating=" + currRating;
-  var func = function (resp){
+  apost("ratings.php", {type: "sendRating", id: id, rating: currRating}, function (resp){
     if (resp == "1"){
       rating = currRating;
       setYour(getYourText());
@@ -179,19 +170,13 @@ function sendRating(){
     } else {
       setYour("Error! " + resp);
     }
-  };
-  var type = "POST";
-  var async = true;
-  
-  ajaxRequest(file, params, func, type, async);
+  });
 }
 
 function deleteRating(){
   removeAllListeners();
   setYour("Deleting...");
-  var file = "ratings.php";
-  var params = "type=deleteRating&id=" + id;
-  var func = function (resp){
+  apost("ratings.php", {type: "deleteRating", id: id}, function (resp){
     if (resp == "1"){
       rating = "-1";
       setYour(getYourText());
@@ -200,9 +185,5 @@ function deleteRating(){
     } else {
       setYour("Error! " + resp);
     }
-  };
-  var type = "POST";
-  var async = true;
-  
-  ajaxRequest(file, params, func, type, async);
+  });
 }
