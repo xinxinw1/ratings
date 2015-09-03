@@ -1,6 +1,6 @@
 <?php header("Cache-Control: no-cache"); ?>
 <?php session_start(); ?>
-<?php $version = "2.0"; ?>
+<?php $version = "1.4"; ?>
 <?php require "dbinfo.php"; ?>
 <?php
 $conn = mysql_connect($dbhost, $dbuser, $dbpass) OR die(mysql_error());

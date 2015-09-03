@@ -1,4 +1,4 @@
-/***** Ratings 2.0 *****/
+/***** Ratings 1.4 *****/
 
 /* require tools 4.5.1 */
 /* require ajax 4.4.0 */
