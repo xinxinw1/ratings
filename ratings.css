@@ -1,0 +1,15 @@
+/***** Ratings *****/
+
+* {margin: 0; padding: 0; border: 0 none;}
+body {color: #000; text-align: left; font: 13px Tahoma, sans-serif;}
+.clear {clear: both;}
+
+#rating {width: 170px; height: 65px;}
+#rating-bar {position: relative; overflow: hidden; width: 170px; margin: 0 auto;}
+#rating img {display: block; float: left;}
+#rating-bottom {margin: 0 10px;}
+#rating-top {position: absolute; top: 0; left: 0; width: 0; height: 100%; overflow: hidden; margin: 0 10px;}
+#rating-top-stars {width: 150px;}
+#rating-text {color: #B5B5B5; font-weight: bold; text-align: center; margin-top: 3px;}
+
+a {color: #666;}

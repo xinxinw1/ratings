@@ -1,0 +1,13 @@
+<?php
+/** Change the following to match your database **/
+$dbhost = "localhost";
+$dbuser = "ratings";
+$dbpass = "ratings";
+$dbname = "ratings";
+
+/** How do I get the current username? (return null for not logged in) **/
+function getUsername(){
+  if (!isset($_SESSION['username']))return null;
+  return $_SESSION['username'];
+}
+?>

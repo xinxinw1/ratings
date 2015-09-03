@@ -27,7 +27,7 @@ function removeClickListener(){
 
 function addRatingBarListeners(){
   $("rating-bar").onmousemove = function (e){
-    if (username != ""){
+    if (loggedin){
       e = e || window.event; // IE-ism
       var x = e.clientX;
       
@@ -54,7 +54,7 @@ function addRatingBarListeners(){
   };
   
   $("rating-bar").onmouseleave = function (){
-    if (username != ""){
+    if (loggedin){
       currRating = -1;
       dispRating(avg);
     }
@@ -87,7 +87,7 @@ function removeDeleteListeners(){
 
 function addAllListeners(){
   addRatingBarListeners();
-  if (username != "")addClickListener();
+  if (loggedin)addClickListener();
   if (rating != "-1")addDeleteListeners();
 }
 
@@ -163,15 +163,19 @@ function ceilTo(n, a){
 
 function getRatings(){
   setStatus("Getting Ratings...");
-  aget("ratings.php", {type: "getRatings", id: id}, function (resp){
-    var nums = resp.split("|");
-    n = nums[0];
-    avg = nums[1];
-    avg = rnd(avg, 2);
-    dispRating(avg);
-    setStatus(getStatusText());
-    setYour(getYourText());
-    addAllListeners();
+  aget("index.php", {type: "getRatings", id: id}, function (resp){
+    if (resp.substring(0, 7) == "success"){
+      var nums = resp.split("|");
+      n = nums[1];
+      avg = nums[2];
+      avg = rnd(avg, 2);
+      dispRating(avg);
+      setStatus(getStatusText());
+      setYour(getYourText());
+      addAllListeners();
+    } else {
+      setStatus("Error! " + resp);
+    }
   });
 }
 
@@ -183,7 +187,7 @@ ajaxerr(function (o){
 });
 
 function doLogout(){
-  username = "";
+  loggedin = false;
   rating = "-1";
 }
 
@@ -193,7 +197,7 @@ function sendRating(){
   removeAllListeners();
   removeError();
   setYour("Sending...");
-  apost("ratings.php", {type: "sendRating", id: id, rating: currRating}, function (resp){
+  apost("index.php", {type: "sendRating", id: id, rating: currRating}, function (resp){
     if (resp == "1"){
       rating = currRating;
       setYour(getYourText());
@@ -212,7 +216,7 @@ function deleteRating(){
   removeAllListeners();
   removeError();
   setYour("Deleting...");
-  apost("ratings.php", {type: "deleteRating", id: id}, function (resp){
+  apost("index.php", {type: "deleteRating", id: id}, function (resp){
     if (resp == "1"){
       rating = "-1";
       setYour(getYourText());

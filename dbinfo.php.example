@@ -1,7 +1,0 @@
-<?php
-/** Change the following to match your database **/
-$dbhost = "localhost";
-$dbuser = "ratings";
-$dbpass = "ratings";
-$dbname = "ratings";
-?>
