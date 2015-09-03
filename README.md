@@ -4,8 +4,6 @@ This plugin allows visitors to rate things on your site.
 
 A demo is available at http://musiclifephilosophy.com/codes/ratings-demo/
 
-Note that 
-
 See also: https://github.com/xinxinw1/ratings-demo
 
 ## Installation
