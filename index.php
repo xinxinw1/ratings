@@ -1,6 +1,6 @@
 <?php header("Cache-Control: no-cache"); ?>
 <?php session_start(); ?>
-<?php $version = "2.0"; ?>
+<?php $version = "2.1"; ?>
 <?php require "authinfo.php"; ?>
 <?php
 $conn = mysql_connect($dbhost, $dbuser, $dbpass) OR die(mysql_error());
@@ -113,7 +113,7 @@ if (!is_null($username) && $id != ""){
   <script>
   loggedin = <?php echo (!is_null($username))?"true":"false" ?>;
   rating = "<?php echo $rating ?>";
-  id = "<?php echo $id ?>";
+  id = decodeURIComponent("<?php echo rawurlencode($id) ?>");
   </script>
 </head>
 

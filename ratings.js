@@ -1,4 +1,4 @@
-/***** Ratings 1.4 *****/
+/***** Ratings 2.1 *****/
 
 /* require tools 4.5.1 */
 /* require ajax 4.4.0 */
@@ -163,7 +163,7 @@ function ceilTo(n, a){
 
 function getRatings(){
   setStatus("Getting Ratings...");
-  aget("index.php", {type: "getRatings", id: id}, function (resp){
+  aget("index.php", {type: "getRatings", id: encodeURIComponent(id)}, function (resp){
     if (resp.substring(0, 7) == "success"){
       var nums = resp.split("|");
       n = nums[1];
@@ -197,7 +197,7 @@ function sendRating(){
   removeAllListeners();
   removeError();
   setYour("Sending...");
-  apost("index.php", {type: "sendRating", id: id, rating: currRating}, function (resp){
+  apost("index.php", {type: "sendRating", id: encodeURIComponent(id), rating: currRating}, function (resp){
     if (resp == "1"){
       rating = currRating;
       setYour(getYourText());
@@ -216,7 +216,7 @@ function deleteRating(){
   removeAllListeners();
   removeError();
   setYour("Deleting...");
-  apost("index.php", {type: "deleteRating", id: id}, function (resp){
+  apost("index.php", {type: "deleteRating", id: encodeURIComponent(id)}, function (resp){
     if (resp == "1"){
       rating = "-1";
       setYour(getYourText());
