@@ -1,12 +1,13 @@
-/***** Ratings 1.2 *****/
+/***** Ratings 1.4 *****/
 
-/* requires "events.js" */
-/* requires "ajax.js" */
-/* requires "prec-math.js" */
+/* require tools 4.5.1 */
+/* require ajax 4.4.0 */
+/* require prec-math 4.3.1 */
 
-function $(a){
-  return document.getElementById(a);
-}
+var aget = $.aget;
+var apost = $.apost;
+var ajaxerr = $.ajaxerr;
+var rnd = R.rnd;
 
 var n = 0;
 var avg = 0;
@@ -15,18 +16,17 @@ var currRating = -1;
 window.onload = getRatings;
 
 function addClickListener(){
-  setListener($("rating-bar"), "click", function (){
+  $("rating-bar").onclick = function (){
     sendRating();
-  });
+  };
 }
 
 function removeClickListener(){
-  removeListener($("rating-bar"), "click");
+  $("rating-bar").onclick = null;
 }
 
 function addRatingBarListeners(){
-  var a;
-  setListener($("rating-bar"), "mousemove", function (e){
+  $("rating-bar").onmousemove = function (e){
     if (username != ""){
       e = e || window.event; // IE-ism
       var x = e.clientX;
@@ -51,38 +51,44 @@ function addRatingBarListeners(){
     } else {
       setYour("Sign in to rate");
     }
-  });
+  };
   
-  setListener($("rating-bar"), "mouseleave", function (){
+  $("rating-bar").onmouseleave = function (){
     if (username != ""){
       currRating = -1;
       dispRating(avg);
     }
     setYour(getYourText());
-  });
+  };
 }
 
 function removeRatingBarListeners(){
-  removeListener($("rating-bar"), "mousemove");
-  removeListener($("rating-bar"), "mouseleave");
+  $("rating-bar").onmousemove = null;
+  $("rating-bar").onmouseleave = null;
 }
 
 function addDeleteListeners(){
-  setListener($("rating-your"), "mouseenter", function (){
+  $("rating-your").onmouseenter = function (){
     var html = "<a href=\"javascript:void(0)\" onclick=\"deleteRating()\">";
     html += "Delete Rating";
     html += "</a>";
     setYour(html);
-  });
+  };
   
-  setListener($("rating-your"), "mouseleave", function (){
+  $("rating-your").onmouseleave = function (){
     setYour(getYourText());
-  });
+  };
 }
 
 function removeDeleteListeners(){
-  removeListener($("rating-your"), "mouseenter");
-  removeListener($("rating-your"), "mouseleave");
+  $("rating-your").onmouseenter = null;
+  $("rating-your").onmouseleave = null;
+}
+
+function addAllListeners(){
+  addRatingBarListeners();
+  if (username != "")addClickListener();
+  if (rating != "-1")addDeleteListeners();
 }
 
 function removeAllListeners(){
@@ -104,27 +110,40 @@ function setYour(text){
   $("rating-your").innerHTML = text;
 }
 
-function getStatusText(){
-  if (n == 0){
-    return "No ratings. Click to rate.";
-  } else {
-    return getStarText(avg) + " | " + getRatingText(n);
-  }
-}
-
-function getYourText(){
-  if (rating == "-1")return "";
-  else return "Your rating: " + getStarText(rating);
-}
-
 function getStarText(stars){
   if (stars == 1)return "1 star";
-  else return stars + " stars";
+  return stars + " stars";
 }
 
 function getRatingText(ratings){
   if (ratings == 1)return "1 rating";
-  else return ratings + " ratings";
+  return ratings + " ratings";
+}
+
+function getStatusText(){
+  if (n == 0)return "No ratings. Click to rate.";
+  return getStarText(avg) + " | " + getRatingText(n);
+}
+
+function getYourText(){
+  if (errmsg != "")return errmsg;
+  if (rating == "-1")return "";
+  return "Your rating: " + getStarText(rating);
+}
+
+var errmsg = "";
+var currtime = null;
+function newError(msg){
+  if (currtime !== null)clearTimeout(currtime);
+  errmsg = msg;
+  setYour(getYourText());
+  currtime = setTimeout(removeError, 3000);
+}
+
+function removeError(){
+  if (currtime !== null)clearTimeout(currtime);
+  errmsg = "";
+  setYour(getYourText());
 }
 
 // http://stackoverflow.com/questions/442404/dynamically-retrieve-the-position-x-y-of-an-html-element
@@ -144,65 +163,67 @@ function ceilTo(n, a){
 
 function getRatings(){
   setStatus("Getting Ratings...");
-  var file = "ratings.php";
-  var params = "type=getRatings&id=" + id;
-  var func = function (resp){
+  aget("ratings.php", {type: "getRatings", id: id}, function (resp){
     var nums = resp.split("|");
     n = nums[0];
     avg = nums[1];
-    avg = roundr(avg, 2);
+    avg = rnd(avg, 2);
     dispRating(avg);
     setStatus(getStatusText());
     setYour(getYourText());
-    addRatingBarListeners();
-    if (username != "")addClickListener();
-    if (rating != "-1")addDeleteListeners();
-  };
-  var type = "GET";
-  var async = true;
-  
-  ajaxRequest(file, params, func, type, async);
+    addAllListeners();
+  });
+}
+
+ajaxerr(function (o){
+  currRating = -1;
+  dispRating(avg);
+  newError("Error! Status: " + o.status);
+  addAllListeners();
+});
+
+function doLogout(){
+  username = "";
+  rating = "-1";
 }
 
 function sendRating(){
   var currRating = window.currRating;
   if (currRating == -1)return;
   removeAllListeners();
+  removeError();
   setYour("Sending...");
-  var file = "ratings.php";
-  var params = "type=sendRating&id=" + id + "&rating=" + currRating;
-  var func = function (resp){
+  apost("ratings.php", {type: "sendRating", id: id, rating: currRating}, function (resp){
     if (resp == "1"){
       rating = currRating;
       setYour(getYourText());
       getRatings();
     } else {
-      setYour("Error! " + resp);
+      if (resp == "Sign in to rate")doLogout();
+      currRating = -1;
+      dispRating(avg);
+      newError("Error! " + resp);
+      addAllListeners();
     }
-  };
-  var type = "POST";
-  var async = true;
-  
-  ajaxRequest(file, params, func, type, async);
+  });
 }
 
 function deleteRating(){
   removeAllListeners();
+  removeError();
   setYour("Deleting...");
-  var file = "ratings.php";
-  var params = "type=deleteRating&id=" + id;
-  var func = function (resp){
+  apost("ratings.php", {type: "deleteRating", id: id}, function (resp){
     if (resp == "1"){
       rating = "-1";
       setYour(getYourText());
       removeDeleteListeners();
       getRatings();
     } else {
-      setYour("Error! " + resp);
+      if (resp == "Sign in to rate")doLogout();
+      currRating = -1;
+      dispRating(avg);
+      newError("Error! " + resp);
+      addAllListeners();
     }
-  };
-  var type = "POST";
-  var async = true;
-  
-  ajaxRequest(file, params, func, type, async);
+  });
 }
