@@ -1,13 +1,13 @@
 <?php header("Cache-Control: no-cache"); ?>
 <?php session_start(); ?>
-<?php $version = "2.1"; ?>
+<?php $version = "2.2"; ?>
 <?php require "authinfo.php"; ?>
 <?php
-$conn = mysql_connect($dbhost, $dbuser, $dbpass) OR die(mysql_error());
-mysql_select_db($dbname, $conn) OR die(mysql_error());
+$conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname) OR die(mysqli_connect_error());
 
 function mysqlEscape($str){
-  return mysql_real_escape_string($str);
+  global $conn;
+  return mysqli_real_escape_string($conn, $str);
 }
 
 if (isset($_REQUEST['type'])){
@@ -15,14 +15,14 @@ if (isset($_REQUEST['type'])){
     $id = mysqlEscape($_GET['id']);
     if ($id == "")die("Need an id");
     $sql = "SELECT rating FROM ratings WHERE item_id='$id'";
-    $result = mysql_query($sql, $conn);
+    $result = mysqli_query($conn, $sql);
     
     if (!$result){
-      die(mysql_error());
+      die(mysqli_error());
     } else {
       $n = 0;
       $sum = 0;
-      while ($rows = mysql_fetch_array($result)){
+      while ($rows = mysqli_fetch_assoc($result)){
         $n++;
         $sum += $rows['rating'];
       }
@@ -40,20 +40,20 @@ if (isset($_REQUEST['type'])){
     $rating = mysqlEscape($_POST['rating']);
     
     $sql = "SELECT rating FROM ratings WHERE username='$username' AND item_id='$id'";
-    $result = mysql_query($sql, $conn);
+    $result = mysqli_query($conn, $sql);
     
     if (!$result){
-      die(mysql_error());
+      die(mysqli_error());
     } else {
-      if (mysql_num_rows($result) == 0){
+      if (mysqli_num_rows($result) == 0){
         $sql = "INSERT INTO ratings (username, item_id, rating) VALUES ('$username', '$id', '$rating')";
       } else {
         $sql = "UPDATE ratings SET rating='$rating' WHERE username='$username' AND item_id='$id'";
       }
-      $result = mysql_query($sql, $conn);
+      $result = mysqli_query($conn, $sql);
       
       if (!$result){
-        die(mysql_error());
+        die(mysqli_error());
       } else {
         die("1");
       }
@@ -67,10 +67,10 @@ if (isset($_REQUEST['type'])){
     $username = mysqlEscape(getUsername());
     $id = mysqlEscape($_POST['id']);
     $sql = "DELETE FROM ratings WHERE username='$username' AND item_id='$id'";
-    $result = mysql_query($sql, $conn);
+    $result = mysqli_query($conn, $sql);
     
     if (!$result){
-      die(mysql_error());
+      die(mysqli_error());
     } else {
       die("1");
     }
@@ -92,9 +92,9 @@ if (!is_null($username) && $id != ""){
   $usernamee = mysqlEscape($username);
   $ide = mysqlEscape($id);
   $sql = "SELECT rating FROM ratings WHERE username='$usernamee' AND item_id='$ide'";
-  $result = mysql_query($sql, $conn);
+  $result = mysqli_query($conn, $sql);
   
-  if ($result && $row = mysql_fetch_array($result)){
+  if ($result && $row = mysqli_fetch_assoc($result)){
     $rating = $row['rating'];
   }
 }
